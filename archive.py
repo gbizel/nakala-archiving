@@ -3,7 +3,7 @@
 
 # # Archive: Link metadata to photos
 
-# In[23]:
+# In[1]:
 
 
 ## install required packages
@@ -170,7 +170,7 @@ def get_list_of_files(dir_name):
 def match_code_photos(photos):
     
     # Create empty dataframe
-    photos_info = pd.DataFrame(columns = ['photo_name','code_folder'])
+    photos_info = pd.DataFrame(columns = ['photo_name','code_folder', 'path_folder'])
     
     
     # add photo infos to dataframe
@@ -188,16 +188,19 @@ def match_code_photos(photos):
 
                 folder_name = split_path[-2]
                 code_folder = folder_name.split(' ')[-1]
+                path_folder = '/'.join(photos[i].split('/')[:-1])
 
                 # add photo infos to dataframe
-                s = pd.Series([photo,code_folder],index=['photo_name','code_folder'])
+                s = pd.Series([photo,code_folder, path_folder],index=['photo_name','code_folder', 'path_folder'])
                 photos_info = photos_info.append(s,ignore_index=True)
 
     print("{} photos were found, {} were discarded because a '#' was found in the path".format(i,i-photos_info.shape[0]))
     print("dataframe contains {} photos before duplicate management".format(photos_info.shape[0]))
 
     # Aggregate photos in multiple folder (add '+' in code_folder)
-    photos_info = photos_info.groupby('photo_name').agg({'code_folder':(lambda x: '+'.join(x))}).reset_index()
+    photos_info = photos_info.groupby('photo_name').agg(
+                    {'code_folder':(lambda x: '+'.join(x)),
+                     'path_folder':(lambda x: list(x))}).reset_index()
 
     print('dataframe contains {} photos after duplicate management'.format(photos_info.shape[0]))
     
@@ -236,7 +239,7 @@ def add_metadata(photos_info, code_dictionary):
                 df_code = code_dictionary[code_type]
                 row_code = df_code[df_code['Code Folder'] == code]
                 metadata = row_code[['Code Display', 'Name', 'Type', 'Latitude', 'Longitude']].values.tolist()[0]
-                photos_info.iloc[i,2] += [metadata]
+                photos_info.iloc[i,3] += [metadata]
 
             except Exception as z:
                 print('metadata not added for line ',i,'because error with: ', z)
@@ -314,4 +317,16 @@ print(t1)
 
 ## Save photos_info into a .csv file
 photos_info.to_csv('photos_info.csv')
+
+
+# In[23]:
+
+
+get_ipython().system(' jupyter nbconvert --to script archive.ipynb')
+
+
+# In[ ]:
+
+
+
 
