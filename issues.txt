@@ -1,0 +1,12 @@
+# Erreurs:
+
+- Fichier avec les codes 'ss' n'a pas les mêmes noms de colonne (il fait planter le code, je l'ai supprimé pour faire mes tests).
+
+- J'ai choisi "Name" pour l'affichage du nom mais parfois "Name MV" serait plus judicieuse, hors cette variable n'est pas présente dans tous les fichiers. Il faudrait idéalement unifier ça pour que la phrase de métadonnées soit plus pertinente.
+
+# Warnings:
+  - La première ligne de chaque fichier Excel doit toujours avoir un code rempli pour que le code marche (-> ne pas laisser de première ligne vide dans les fichiers cartes)
+
+  - Dans chaque fichier excel, les codes doivent tous avoir les mêmes lettres au début. (Exemple: dans le fichier 'bc', s'il y a une ligne avec 't001', elle sera ignorée)
+
+- Je regarde 'Code Folder' pour le matching et j'affiche 'Code Display' dans le message de métadonnées. Pourquoi il y a deux codes ? Attention.
