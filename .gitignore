@@ -1,2 +1,3 @@
 base photos/*
 .ipynb_checkpoints
+*.csv
