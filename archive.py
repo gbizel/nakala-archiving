@@ -3,7 +3,7 @@
 
 # # Archive: Link metadata to photos
 
-# In[1]:
+# In[23]:
 
 
 ## install required packages
@@ -164,13 +164,13 @@ def get_list_of_files(dir_name):
     return all_files
 
 
-# In[16]:
+# In[13]:
 
 
 def match_code_photos(photos):
     
     # Create empty dataframe
-    photos_info = pd.DataFrame(columns = ['photo_name','code_folder', 'path_folder'])
+    photos_info = pd.DataFrame(columns = ['photo_name','code_folder'])
     
     
     # add photo infos to dataframe
@@ -188,32 +188,29 @@ def match_code_photos(photos):
 
                 folder_name = split_path[-2]
                 code_folder = folder_name.split(' ')[-1]
-                path_folder = '/'.join(photos[i].split('/')[:-1])
 
                 # add photo infos to dataframe
-                s = pd.Series([photo,code_folder, path_folder],index=['photo_name','code_folder', 'path_folder'])
+                s = pd.Series([photo,code_folder],index=['photo_name','code_folder'])
                 photos_info = photos_info.append(s,ignore_index=True)
 
     print("{} photos were found, {} were discarded because a '#' was found in the path".format(i,i-photos_info.shape[0]))
     print("dataframe contains {} photos before duplicate management".format(photos_info.shape[0]))
 
     # Aggregate photos in multiple folder (add '+' in code_folder)
-    photos_info = photos_info.groupby('photo_name').agg(
-                    {'code_folder':(lambda x: '+'.join(x)),
-                     'path_folder':(lambda x: list(x))}).reset_index()
+    photos_info = photos_info.groupby('photo_name').agg({'code_folder':(lambda x: '+'.join(x))}).reset_index()
 
     print('dataframe contains {} photos after duplicate management'.format(photos_info.shape[0]))
     
     return photos_info
 
 
-# In[17]:
+# In[14]:
 
 
 photos = get_list_of_files(path_photos)
 
 
-# In[18]:
+# In[15]:
 
 
 photos_info = match_code_photos(photos)
@@ -221,7 +218,7 @@ photos_info = match_code_photos(photos)
 
 # ## 3. Match photos & site information
 
-# In[19]:
+# In[16]:
 
 
 def add_metadata(photos_info, code_dictionary):
@@ -247,7 +244,7 @@ def add_metadata(photos_info, code_dictionary):
     return photos_info
 
 
-# In[20]:
+# In[17]:
 
 
 def sentence(metadata):
@@ -284,7 +281,7 @@ def sentence(metadata):
         return sentence
 
 
-# In[21]:
+# In[18]:
 
 
 def add_sentences(photos_info):
@@ -292,19 +289,19 @@ def add_sentences(photos_info):
     return photos_info
 
 
-# In[22]:
+# In[19]:
 
 
 photos_info = add_metadata(photos_info, code_dictionary)
 
 
-# In[23]:
+# In[20]:
 
 
 photos_info = add_sentences(photos_info)
 
 
-# In[24]:
+# In[21]:
 
 
 # End timer
@@ -312,15 +309,9 @@ t1 = time() - t0
 print(t1)
 
 
-# In[25]:
+# In[22]:
 
 
 ## Save photos_info into a .csv file
 photos_info.to_csv('photos_info.csv')
-
-
-# In[ ]:
-
-
-
 
