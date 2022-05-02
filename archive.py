@@ -81,7 +81,7 @@ def gather_cartes_info(path):
 
     cartes_info = []
     files = os.listdir(path)
-
+    
     for file in files:
         try:
             df_file = read_all_sheets(path + '/' + file)
@@ -110,7 +110,7 @@ def get_code_dictionary(list_df_files):
     """
     returns a dictionary, the keys are the code types, the values are the associated dataframes
     """
-    
+        
     code_dictionary = {}
 
     for df in list_df_files:
@@ -238,7 +238,13 @@ def add_metadata(photos_info, code_dictionary):
             try :
                 df_code = code_dictionary[code_type]
                 row_code = df_code[df_code['Code Folder'] == code]
-                metadata = row_code[['Code Display', 'Name', 'Type', 'Latitude', 'Longitude']].values.tolist()[0]
+                metadata = row_code[['Code Display',
+                                     'Name',
+                                     'Type',
+                                     'Latitude',
+                                     'Longitude',
+                                     'Location',
+                                     'Region']].values.tolist()[0]
                 photos_info.iloc[i,3] += [metadata]
 
             except Exception as z:
@@ -261,10 +267,11 @@ def sentence(metadata):
     
         sites = ""
 
-        #if len(code_sites) == 1: ### TODO more than 1 ###
         for i, metadata_i in enumerate(metadata):
-
-            site_i = str(metadata_i[1])                         + " (code: " + str(metadata_i[0])                         + ", type: " + str(metadata_i[2])                         + ", coordinates : " + str(metadata_i[3]) + "°N "                         + str(metadata_i[4]) + "°E)"
+            
+            code, name, type_code, latitude, longitude, location, region = metadata_i
+            
+            site_i = f"{name} (code: {code}, type: {type_code}, coordinates: {longitude}°N {latitude}°E)"
             
             if i != n_codes - 1:
                 site_i += ', '
@@ -274,12 +281,16 @@ def sentence(metadata):
             sites += site_i
 
         if n_codes == 1:
-            intro = "This is a picture of a heritage site in Ladakh. The site is : "
+            intro = "This is a picture of a heritage site in Ladakh. "
+            intro_p2 = "The site is: "
 
         if n_codes > 1:
-            intro = "This is a picture of " + str(n_codes) + " heritage sites in Ladakh. The sites are : "
+            intro = "This is a picture of " + str(n_codes) + " heritage sites in Ladakh. "
+            intro_p2 = "The sites are: "
         
-        sentence = intro + sites + "More information: ladakharcheology.com"
+        location_sentence = f"Location: {location} ({region}). "
+        
+        sentence = intro + location_sentence + intro_p2 + sites + "More information: ladakharcheology.com"
         
         return sentence
 
@@ -323,10 +334,4 @@ photos_info.to_csv('photos_info.csv')
 
 
 get_ipython().system(' jupyter nbconvert --to script archive.ipynb')
-
-
-# In[ ]:
-
-
-
 
