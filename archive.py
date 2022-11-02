@@ -3,7 +3,7 @@
 
 # # Archive: Link metadata to photos
 
-# In[1]:
+# In[ ]:
 
 
 ## install required packages
@@ -12,25 +12,27 @@
 get_ipython().system(' echo "pandas==1.1.4" > requirements.txt')
 get_ipython().system(' echo "numpy==1.19.4" >> requirements.txt')
 get_ipython().system(' echo "tqdm==4.54.0" >> requirements.txt')
+#! echo "xlrd==1.2.0" >> requirements.txt
 
 # install requirements
 get_ipython().system(' pip install -r requirements.txt')
 
 
-# In[2]:
+# In[ ]:
 
 
 ## import required packages
 
-import os
+import os, ast
 import pandas as pd
 import numpy as np
 from time import time
 from tqdm import tqdm
+
 tqdm.pandas()
 
 
-# In[3]:
+# In[ ]:
 
 
 # Start timer
@@ -39,7 +41,7 @@ t0 = time()
 
 # ## 0. Variables to be modified
 
-# In[4]:
+# In[ ]:
 
 
 # path to photos root
@@ -51,7 +53,7 @@ path_cartes = 'base photos/cartes'
 
 # ## 1. Creation of a dictionnary storing each folder code with the matching metadata
 
-# In[5]:
+# In[ ]:
 
 
 def read_all_sheets(path):
@@ -68,20 +70,20 @@ def read_all_sheets(path):
     return df
 
 
-# In[6]:
+# In[ ]:
 
 
 def gather_cartes_info(path):
     """
     creates a list of dataframes,
     each dataframe containing the information of each sites for a specific type
-    
+
     ignores all files that do not work
     """
 
     cartes_info = []
     files = os.listdir(path)
-    
+
     for file in files:
         try:
             df_file = read_all_sheets(path + '/' + file)
@@ -89,11 +91,11 @@ def gather_cartes_info(path):
         except Exception as e:
             print('\nFile discarded as a carte :', file)
             print('Error :', e)
-            
+
     return(cartes_info)
 
 
-# In[7]:
+# In[ ]:
 
 
 def remove_digits(string):
@@ -103,14 +105,14 @@ def remove_digits(string):
     return ''.join([i for i in string if not i.isdigit()])
 
 
-# In[8]:
+# In[ ]:
 
 
 def get_code_dictionary(list_df_files):
     """
     returns a dictionary, the keys are the code types, the values are the associated dataframes
     """
-        
+
     code_dictionary = {}
 
     for df in list_df_files:
@@ -123,19 +125,19 @@ def get_code_dictionary(list_df_files):
     return code_dictionary
 
 
-# In[9]:
+# In[ ]:
 
 
 cartes_info = gather_cartes_info(path_cartes)
 
 
-# In[10]:
+# In[ ]:
 
 
 code_dictionary = get_code_dictionary(cartes_info)
 
 
-# In[11]:
+# In[ ]:
 
 
 print(code_dictionary.keys())
@@ -143,36 +145,36 @@ print(code_dictionary.keys())
 
 # ## 2. Creation of a dataframe containing all photo names and their code folders
 
-# In[12]:
+# In[ ]:
 
 
 def get_list_of_files(dir_name):
-    # create a list of file and sub directories 
-    # names in the given directory 
+    # create a list of file and sub directories
+    # names in the given directory
     list_of_files = os.listdir(dir_name)
     all_files = list()
     # Iterate over all the entries
     for entry in list_of_files:
         # Create full path
         full_path = os.path.join(dir_name, entry)
-        # If entry is a directory then get the list of files in this directory 
+        # If entry is a directory then get the list of files in this directory
         if os.path.isdir(full_path):
             all_files = all_files + get_list_of_files(full_path)
         else:
             all_files.append(full_path)
-                
+
     return all_files
 
 
-# In[13]:
+# In[ ]:
 
 
 def match_code_photos(photos):
-    
+
     # Create empty dataframe
     photos_info = pd.DataFrame(columns = ['photo_name','code_folder', 'path_folder'])
-    
-    
+
+
     # add photo infos to dataframe
     for i in tqdm(range(0,len(photos))):
 
@@ -203,17 +205,17 @@ def match_code_photos(photos):
                      'path_folder':(lambda x: list(x))}).reset_index()
 
     print('dataframe contains {} photos after duplicate management'.format(photos_info.shape[0]))
-    
+
     return photos_info
 
 
-# In[14]:
+# In[ ]:
 
 
 photos = get_list_of_files(path_photos)
 
 
-# In[15]:
+# In[ ]:
 
 
 photos_info = match_code_photos(photos)
@@ -221,7 +223,7 @@ photos_info = match_code_photos(photos)
 
 # ## 3. Match photos & site information
 
-# In[16]:
+# In[ ]:
 
 
 def add_metadata(photos_info, code_dictionary):
@@ -233,7 +235,7 @@ def add_metadata(photos_info, code_dictionary):
 
         code_list = code_folder.split('+')
 
-        for code in code_list:    
+        for code in code_list:
             code_type = remove_digits(code)
             try :
                 df_code = code_dictionary[code_type]
@@ -249,35 +251,35 @@ def add_metadata(photos_info, code_dictionary):
 
             except Exception as z:
                 print('metadata not added for line ',i,'because error with: ', z)
-                
+
     return photos_info
 
 
-# In[17]:
+# In[ ]:
 
 
 def sentence(metadata):
-    
+
     n_codes = len(metadata)
-    
+
     if n_codes == 0:
         return ""
-    
+
     else:
-    
+
         sites = ""
 
         for i, metadata_i in enumerate(metadata):
-            
+
             code, name, type_code, latitude, longitude, location, region = metadata_i
-            
+
             site_i = f"{name} (code: {code}, type: {type_code}, coordinates: {longitude}°N {latitude}°E)"
-            
+
             if i != n_codes - 1:
                 site_i += ', '
             else:
                 site_i += '. '
-            
+
             sites += site_i
 
         if n_codes == 1:
@@ -287,15 +289,15 @@ def sentence(metadata):
         if n_codes > 1:
             intro = "This is a picture of " + str(n_codes) + " heritage sites in Ladakh. "
             intro_p2 = "The sites are: "
-        
+
         location_sentence = f"Location: {location} ({region}). "
-        
-        sentence = intro + location_sentence + intro_p2 + sites + "More information: ladakharcheology.com"
-        
+
+        sentence = intro + location_sentence + intro_p2 + sites + "More information: ladakharchaeology.com"
+
         return sentence
 
 
-# In[18]:
+# In[ ]:
 
 
 def add_sentences(photos_info):
@@ -303,19 +305,19 @@ def add_sentences(photos_info):
     return photos_info
 
 
-# In[19]:
+# In[ ]:
 
 
 photos_info = add_metadata(photos_info, code_dictionary)
 
 
-# In[20]:
+# In[ ]:
 
 
 photos_info = add_sentences(photos_info)
 
 
-# In[21]:
+# In[ ]:
 
 
 # End timer
@@ -323,15 +325,144 @@ t1 = time() - t0
 print(t1)
 
 
-# In[22]:
+# In[ ]:
 
 
 ## Save photos_info into a .csv file
 photos_info.to_csv('photos_info.csv')
 
 
-# In[23]:
+# ## 4. Reshape file
+
+# In[ ]:
 
 
-get_ipython().system(' jupyter nbconvert --to script archive.ipynb')
+dict_authors = {'QD': "Devers,Quentin,0000-0001-8469-0165"}
 
+
+# In[ ]:
+
+
+photos_info = pd.read_csv('photos_info.csv', index_col=0)
+photos_info['path_folder'] = photos_info['path_folder'].apply(lambda x: ast.literal_eval(x))
+photos_info['metadata'] = photos_info['metadata'].apply(lambda x: ast.literal_eval(x))
+photos_info
+
+
+# In[ ]:
+
+
+photos_info['Status'] = 'pending'
+
+
+# In[ ]:
+
+
+photos_info['Title'] = photos_info['photo_name'].apply(lambda x: x.split('.')[0].split('-')[-1])
+
+
+# In[ ]:
+
+
+photos_info['Path'] = photos_info['path_folder'].apply(lambda x: x[0]) + '/' + photos_info['photo_name']
+
+
+# In[ ]:
+
+
+photos_info['Description'] = photos_info['sentence']
+
+
+# In[ ]:
+
+
+photos_info['Creator'] = photos_info['photo_name'].apply(lambda x: dict_authors[x[0:2]])
+
+
+# In[ ]:
+
+
+photos_info['Year'] = photos_info['photo_name'].apply(lambda x: x.split('.')[0].split('-')[1])
+
+
+# In[ ]:
+
+
+photos_info['Type'] = 'Image' #'http://purl.org/coar/resource_type/c_c513'
+
+
+# In[ ]:
+
+
+photos_info['License'] = 'CC-BY-NC-4.0'
+
+
+# In[ ]:
+
+
+def extract_keywords(row):
+
+    try:
+
+        list_keywords = [' '.join(list(reversed(row['Creator'].split(',')[0:2]))), # creator
+        row.metadata[0][6], # Region
+        row.metadata[0][5], # Location
+        row.metadata[0][2]  # Type
+                        ]
+
+        code_type = list(list(zip(*row.metadata))[0])
+
+        return list_keywords + code_type
+
+    except Exception as e:
+        print("Error for photo: {} / type: {} / metadata: {} // Error: {}".format(row.photo_name,
+                                                                                  row.code_folder,
+                                                                                  row.metadata,
+                                                                                  e)
+             )
+
+        return ['']*4
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+photos_info[photos_info.apply(lambda row: extract_keywords(row),axis=1).isna()]
+
+
+# In[ ]:
+
+
+photos_info['Keywords'] = photos_info.apply(lambda row: extract_keywords(row),axis=1)
+
+
+# In[ ]:
+
+
+photos_info['Collections'] = photos_info['Keywords'].apply(lambda x: ','.join(x[3:]))
+photos_info['Keywords'] = photos_info['Keywords'].apply(lambda x: ','.join(x))
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+photos_info = photos_info.filter(['Status', 'Title', 'Path', 'Description', 'Creator', 'Year', 'Keywords', 'Type', 'License', 'Collections'])
+photos_info
+
+
+# In[ ]:
+
+
+photos_info.to_csv('photos_info_nkl.csv', index=False)
