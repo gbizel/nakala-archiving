@@ -77,13 +77,13 @@ def gather_cartes_info(path):
     """
     creates a list of dataframes,
     each dataframe containing the information of each sites for a specific type
-
+    
     ignores all files that do not work
     """
 
     cartes_info = []
     files = os.listdir(path)
-
+    
     for file in files:
         try:
             df_file = read_all_sheets(path + '/' + file)
@@ -91,7 +91,7 @@ def gather_cartes_info(path):
         except Exception as e:
             print('\nFile discarded as a carte :', file)
             print('Error :', e)
-
+            
     return(cartes_info)
 
 
@@ -112,7 +112,7 @@ def get_code_dictionary(list_df_files):
     """
     returns a dictionary, the keys are the code types, the values are the associated dataframes
     """
-
+        
     code_dictionary = {}
 
     for df in list_df_files:
@@ -149,20 +149,20 @@ print(code_dictionary.keys())
 
 
 def get_list_of_files(dir_name):
-    # create a list of file and sub directories
-    # names in the given directory
+    # create a list of file and sub directories 
+    # names in the given directory 
     list_of_files = os.listdir(dir_name)
     all_files = list()
     # Iterate over all the entries
     for entry in list_of_files:
         # Create full path
         full_path = os.path.join(dir_name, entry)
-        # If entry is a directory then get the list of files in this directory
+        # If entry is a directory then get the list of files in this directory 
         if os.path.isdir(full_path):
             all_files = all_files + get_list_of_files(full_path)
         else:
             all_files.append(full_path)
-
+                
     return all_files
 
 
@@ -170,11 +170,11 @@ def get_list_of_files(dir_name):
 
 
 def match_code_photos(photos):
-
+    
     # Create empty dataframe
     photos_info = pd.DataFrame(columns = ['photo_name','code_folder', 'path_folder'])
-
-
+    
+    
     # add photo infos to dataframe
     for i in tqdm(range(0,len(photos))):
 
@@ -205,7 +205,7 @@ def match_code_photos(photos):
                      'path_folder':(lambda x: list(x))}).reset_index()
 
     print('dataframe contains {} photos after duplicate management'.format(photos_info.shape[0]))
-
+    
     return photos_info
 
 
@@ -235,7 +235,7 @@ def add_metadata(photos_info, code_dictionary):
 
         code_list = code_folder.split('+')
 
-        for code in code_list:
+        for code in code_list:    
             code_type = remove_digits(code)
             try :
                 df_code = code_dictionary[code_type]
@@ -251,7 +251,7 @@ def add_metadata(photos_info, code_dictionary):
 
             except Exception as z:
                 print('metadata not added for line ',i,'because error with: ', z)
-
+                
     return photos_info
 
 
@@ -259,27 +259,27 @@ def add_metadata(photos_info, code_dictionary):
 
 
 def sentence(metadata):
-
+    
     n_codes = len(metadata)
-
+    
     if n_codes == 0:
         return ""
-
+    
     else:
-
+    
         sites = ""
 
         for i, metadata_i in enumerate(metadata):
-
+            
             code, name, type_code, latitude, longitude, location, region = metadata_i
-
+            
             site_i = f"{name} (code: {code}, type: {type_code}, coordinates: {longitude}°N {latitude}°E)"
-
+            
             if i != n_codes - 1:
                 site_i += ', '
             else:
                 site_i += '. '
-
+            
             sites += site_i
 
         if n_codes == 1:
@@ -289,11 +289,11 @@ def sentence(metadata):
         if n_codes > 1:
             intro = "This is a picture of " + str(n_codes) + " heritage sites in Ladakh. "
             intro_p2 = "The sites are: "
-
+        
         location_sentence = f"Location: {location} ({region}). "
-
+        
         sentence = intro + location_sentence + intro_p2 + sites + "More information: ladakharchaeology.com"
-
+        
         return sentence
 
 
@@ -403,7 +403,7 @@ photos_info['License'] = 'CC-BY-NC-4.0'
 def extract_keywords(row):
 
     try:
-
+    
         list_keywords = [' '.join(list(reversed(row['Creator'].split(',')[0:2]))), # creator
         row.metadata[0][6], # Region
         row.metadata[0][5], # Location
@@ -411,9 +411,9 @@ def extract_keywords(row):
                         ]
 
         code_type = list(list(zip(*row.metadata))[0])
-
+        
         return list_keywords + code_type
-
+    
     except Exception as e:
         print("Error for photo: {} / type: {} / metadata: {} // Error: {}".format(row.photo_name,
                                                                                   row.code_folder,
@@ -466,3 +466,10 @@ photos_info
 
 
 photos_info.to_csv('photos_info_nkl.csv', index=False)
+
+
+# In[ ]:
+
+
+get_ipython().system(' jupyter nbconvert --to script archive.ipynb')
+
