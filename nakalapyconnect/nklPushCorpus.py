@@ -90,6 +90,7 @@ def post_collections(dicoMetas):
 
     response = requests.post(url, data =json.dumps(dicoMetas), headers=APIheaders)
 
+    """
     # traiter la réponse du server
     # réponse 201 c'est que la création c'est bien passée.
     # sinon c'est qu'il y a eu un soucis.
@@ -106,7 +107,9 @@ def post_collections(dicoMetas):
        handle = json_resp['payload']['id']
 
        return handle
+       """
 
+    return response
 
 #-----------------------------------------------------------------------------
 # DATA
