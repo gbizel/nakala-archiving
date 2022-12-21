@@ -107,7 +107,7 @@ def post_collections(dicoMetas):
        handle = json_resp['payload']['id']
 
        return handle
-       """
+    """
 
     return response
 
