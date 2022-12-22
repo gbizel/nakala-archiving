@@ -1,0 +1,1 @@
+You can regulary empty this folder, it is there to temporarily house the files without EXIF.
